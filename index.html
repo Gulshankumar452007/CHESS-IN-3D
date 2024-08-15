@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Chessboard</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Scene, Camera, Renderer
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Chessboard
+        const boardSize = 8;
+        const squareSize = 1;
+        const boardGeometry = new THREE.BoxGeometry(boardSize * squareSize, 0.1, boardSize * squareSize);
+        const boardMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
+        const board = new THREE.Mesh(boardGeometry, boardMaterial);
+        board.position.y = -0.05;
+        scene.add(board);
+
+        // Function to create a chess piece
+        function createPiece(color, x, z) {
+            const pieceGeometry = new THREE.CylinderGeometry(0.4, 0.4, 1, 32);
+            const pieceMaterial = new THREE.MeshPhongMaterial({ color });
+            const piece = new THREE.Mesh(pieceGeometry, pieceMaterial);
+            piece.position.set(x, 0.5, z);
+            return piece;
+        }
+
+        // Add pieces
+        const pieceColors = [0xffffff, 0x000000]; // White and Black
+        for (let i = 0; i < boardSize; i++) {
+            for (let j = 0; j < 2; j++) {
+                const color = pieceColors[j];
+                for (let k = 0; k < boardSize; k++) {
+                    const piece = createPiece(color, i * squareSize - (boardSize / 2 * squareSize) + squareSize / 2, k * squareSize - (boardSize / 2 * squareSize) + squareSize / 2);
+                    scene.add(piece);
+                }
+            }
+        }
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x404040);
+        scene.add(ambientLight);
+        const pointLight = new THREE.PointLight(0xffffff, 1, 100);
+        pointLight.position.set(10, 10, 10);
+        scene.add(pointLight);
+
+        // Camera position
+        camera.position.z = 10;
+        camera.position.y = 5;
+        camera.lookAt(0, 0, 0);
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Handle resizing
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
